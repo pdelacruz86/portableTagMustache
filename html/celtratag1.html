@@ -1,0 +1,25 @@
+<div class="celtra-ad-v3">
+    <!-- externalCreativeId  = raw       ${CREATIVE_ID} -->
+    <!-- externalPlacementId = raw       ${TAG_ID} -->
+    <!-- externalSiteId      = raw       ${SITE_ID} -->
+    <!-- externalSiteName    = urldecode ${REFERER_URL_ENC} -->
+    <!-- externalSupplierId  = raw       ${PUBLISHER_ID} -->
+    <!-- externalCampaignId  = raw       ${CP_ID} -->
+    <img src="data:image/png,celtra" style="display: none" onerror="
+        (function(img) {
+            var params = {'clickUrl':'${CLICK_URL}','expandDirection':'undefined','preferredClickThroughWindow':'new','textColor':'#FFFFFF','barColor':'#000000','advertisementMessage':'Advertisement','scrollMessage':'Scroll to continue with content','useFullWidth':'1','clickEvent':'advertiser','iosAdvId':'${DEVICE_APPLE_IDA}','externalAdServer':'AppNexus','tagVersion':'4'};
+            [].slice.apply(img.parentNode.childNodes).forEach(function(n) { var decfs = { urldecode: decodeURIComponent, htmldecode: function(v) { var d = document.createElement('div'); d.innerHTML = v; return d.textContent; }, eval: function(v) { return eval(v); }, raw: function(v) { return v; } }; var m; if (n.nodeType == 8 &amp;&amp; (m = n.textContent.match(/^&#92;s+([&#92;w.]+)(&#92;[.+&#92;])?&#92;s+=&#92;s+(&#92;w+)&#92;s+(.*)$/i))) { try { params[m[1]+(m[2] || '')] = decfs[m[3]](m[4].replace(/^&#92;s+|&#92;s+$/g, '')); } catch (e) {} } });
+            var req = document.createElement('script');
+            req.id = params.scriptId = 'celtra-script-' + (window.celtraScriptIndex = (window.celtraScriptIndex||0)+1);
+            params.clientTimestamp = new Date/1000;
+            params.clientTimeZoneOffsetInMinutes = new Date().getTimezoneOffset();
+            params.hostPageLoadId = window.celtraHostPageLoadId = (window.celtraHostPageLoadId || (Math.random()+'').slice(2));
+            var src = (window.location.protocol == 'https:' ? 'https' : 'http') + '://ads.celtra.com/70dd0ba3/web.js?';
+            for (var k in params) {
+                src += '&amp;' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+            }
+            req.src = src;
+            img.parentNode.insertBefore(req, img.nextSibling);
+        })(this);
+    "/>
+</div>

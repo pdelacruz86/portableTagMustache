@@ -1,0 +1,22 @@
+{
+  "name": "portableMustache",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compress": "zip -r portabletag.zip ./"
+  },
+  "author": "pdelacruz",
+  "license": "ISC",
+  "devDependencies": {
+    "fs": "0.0.1-security",
+    "lodash": "^4.17.4",
+    "mustache": "^2.3.0"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.69.0",
+    "bluebird": "^3.5.0",
+    "mustache": "^2.2.1"
+  }
+}
