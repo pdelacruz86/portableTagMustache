@@ -13,7 +13,7 @@ var Promise = require('bluebird')
 
 // utility function
 function getFileAsync(filepath) {
-    return fs.readFileAsync(filepath);
+  return fs.readFileAsync(filepath);
 }
 
 //adding promise to fs
@@ -26,9 +26,9 @@ Promise.promisifyAll(fs);
  * @params contains a list of parameter passed to the lambda expressions by querystring
  */
 
-function compileTag(params, callback) {
+ function compileTag(params, callback) {
   var templateFile = "portable.tmpl.js"
-  var celtraTagTemplateFile = "celtratag.html"
+  var celtraTagTemplateFile = params.fileName
 
   //promise function to get the tag html from aws 3 bucket
   S3.getHtmlTagAsync(celtraTagTemplateFile).then(function(data){
@@ -44,15 +44,15 @@ function compileTag(params, callback) {
       // <!-- externalSiteName    = urldecode ${REFERER_URL_ENC} -->
       // <!-- externalSupplierId  = raw       ${PUBLISHER_ID} -->
       // <!-- externalCampaignId  = raw       ${CP_ID} -->
-     **/
+      **/
 
-    source = _.replace(source, '${CLICK_URL}', '{{clickUrl}}')
-    source = _.replace(source, '${CREATIVE_ID}', '{{externalCreativeId}}')
-    source = _.replace(source, '${TAG_ID}', '{{externalPlacementID}}')
-    source = _.replace(source, '${SITE_ID}', '{{externalSiteID}}')
-    source = _.replace(source, '${REFERER_URL_ENC}', '{{externalSiteName}}')
-    source = _.replace(source, '${PUBLISHER_ID}', '{{externalSupplierId}}')
-    source = _.replace(source, '${CP_ID}', '{{externalCampaignId}}')
+      source = _.replace(source, '${CLICK_URL}', '{{clickUrl}}')
+      source = _.replace(source, '${CREATIVE_ID}', '{{externalCreativeId}}')
+      source = _.replace(source, '${TAG_ID}', '{{externalPlacementID}}')
+      source = _.replace(source, '${SITE_ID}', '{{externalSiteID}}')
+      source = _.replace(source, '${REFERER_URL_ENC}', '{{externalSiteName}}')
+      source = _.replace(source, '${PUBLISHER_ID}', '{{externalSupplierId}}')
+      source = _.replace(source, '${CP_ID}', '{{externalCampaignId}}')
 
     // call the render function
     var outputString = Mustache.render(source, params);
@@ -69,7 +69,7 @@ function compileTag(params, callback) {
       var outputString = Mustache.render(source, params);
       //return a callback with the output string
       return callback(null, outputString);
-  });
+    });
   })
 }
 
@@ -79,10 +79,10 @@ function compileTag(params, callback) {
  *
  * @event contains all the pathParameters and queryString Parameters passed by the API gateway
  */
-exports.handler = function handler(event, context, callback) {
+ exports.handler = function handler(event, context, callback) {
   //path parameters comming into the function
-  var userName = _.get(event, "pathParameters.userName", false);
-  var fileName = _.get(event, "pathParameters.fileName", false);
+  var userName = _.get(event, "pathParameters.username", false);
+  var fileName = _.get(event, "pathParameters.filename", false);
   var clickUrl = _.get(event, "queryStringParameters.clickUrl", false);
   var externalCreativeId = _.get(event, "queryStringParameters.externalCreativeId", false);
   var externalPlacementID = _.get(event, "queryStringParameters.externalPlacementID", false);
@@ -90,36 +90,56 @@ exports.handler = function handler(event, context, callback) {
   var externalSiteName = _.get(event, "queryStringParameters.externalSiteName", false);
   var externalSupplierId = _.get(event, "queryStringParameters.externalSupplierId", false);
   var externalCampaignId = _.get(event, "queryStringParameters.externalCampaignId", false);
+
+  console.log(data);
+
+  console.log(event.pathParameters, event.pathParameters.filename)
+  if (event.pathParameters !== null && event.pathParameters !== undefined) {
+    console.log('filename', 'entro 1')
+    if (event.pathParameters.filename !== undefined && event.pathParameters.filename !== null && event.pathParameters.filename !== "") {
+      console.log("Received fileName: " + event.pathParameters.filename);
+      fileName = event.pathParameters.filename;
+    }
+
+  if (event.pathParameters.username !== undefined && event.pathParameters.username !== null && event.pathParameters.username !== "") {
+    console.log('username', 'entro 1')
+      console.log("Received userName: " + event.pathParameters.username);
+      username = event.pathParameters.username;
+    }
+  }
+
   
   //data object
   var data = {
-      userName: userName,
-      fileName: fileName,
-      clickUrl: clickUrl,
-      externalCreativeId: externalCreativeId,
-      externalPlacementID: externalPlacementID,
-      externalSiteID: externalSiteID,
-      externalSiteName: externalSiteName,
-      externalSupplierId: externalSupplierId,
-      externalCampaignId: externalCampaignId,
-      htmlString: ''
+    userName: userName,
+    fileName: fileName,
+    clickUrl: clickUrl,
+    externalCreativeId: externalCreativeId,
+    externalPlacementID: externalPlacementID,
+    externalSiteID: externalSiteID,
+    externalSiteName: externalSiteName,
+    externalSupplierId: externalSupplierId,
+    externalCampaignId: externalCampaignId,
+    htmlString: ''
   };
+
+  console.log("request: " + JSON.stringify(event));
 
 //compile the tag
 compileTag(data, function(err, result) {
-    if (err) {
-      return callback("Unknown Error");
+  if (err) {
+    return callback("Unknown Error");
+  }
+  var response = {
+    "statusCode": 200,
+    "body": result,
+    "headers": {
+      "Content-Type": "application/javascript"
     }
-    var response = {
-      statusCode: 200,
-      body: result,
-      headers: {
-        "Content-Type": "application/javascript"
-      }
-    };
+  };
 
-    return callback(null, response);
-  });
+  return callback(null, response);
+});
 
 }
 
@@ -133,16 +153,16 @@ compileTag(data, function(err, result) {
 //   {
 //     pathParameters: { 
 //       userName: 'User1',
-//       fileName: "testname.html"
+//       fileName: "celtratag.html"
 //     },
 //     queryStringParameters: {
-//       clickUrl: 'www.test.com', 
-//       externalCreativeId : 69146847, 
-//       externalPlacementID :11282894,
-//       externalSiteID: 2924258,
-//       externalSiteName: 'www.padsquad2.com',
-//       externalSupplierId: 100240,
-//       externalCampaignId: '${CP_ID}'
+//       // clickUrl: 'www.test.com', 
+//       // externalCreativeId : 69146847, 
+//       // externalPlacementID :11282894,
+//       // externalSiteID: 2924258,
+//       // externalSiteName: 'www.padsquad2.com',
+//       // externalSupplierId: 100240,
+//       // externalCampaignId: '${CP_ID}'
 //     }
 //   }, 
 //   null, 
@@ -168,7 +188,7 @@ compileTag(data, function(err, result) {
 // {
 //   "pathParameters": { 
 //     "userName": "User1",
-//     "fileName": "testname.html", 
+//     "fileName": "celtratag.html", 
 //   },
 //   "queryStringParameters": {
 //     "externalCreativeId" : 69146847, 
@@ -179,4 +199,8 @@ compileTag(data, function(err, result) {
 //     "externalCampaignId": "${CP_ID}"
 //   }
 // }
+
+
+
+
 

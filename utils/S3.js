@@ -33,7 +33,7 @@
      */
     
     function getHtmlTagAsync(filename) {
-      var key = 'user1/celtratag.html';
+      var key = 'user1/' + filename;
       var params = {
         Key: key
       }
@@ -47,7 +47,7 @@
      *
      */
     function getHtmlTag(filename, callback) {
-      var key = 'user1/celtratag.html';
+      var key = 'user1/' + filename;
 
       var params = {
         Key: key
